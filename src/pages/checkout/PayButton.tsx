@@ -10,7 +10,9 @@ const PayButton = () => {
 
   const handleClick = () => {
     setLoading(true);
-    confirm().then((result) => {
+    confirm({
+      returnUrl: 'http://localhost:5173'
+    }).then((result) => {
       if (result.type === 'error') {
         setError(result.error)
       }

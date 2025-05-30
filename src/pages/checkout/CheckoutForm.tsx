@@ -1,12 +1,117 @@
-import {PaymentElement} from '@stripe/react-stripe-js';
+import React, { useState } from "react";
+import {
+  PaymentElement,
+  useCheckout,
+} from '@stripe/react-stripe-js';
+import {Button} from "@/components/ui/button.tsx";
+import {Input} from "@/components/ui/input.tsx";
 
-function CheckoutForm() {
-  // const checkout = useCheckout();
+const validateEmail = async (email, checkout) => {
+  const updateResult = await checkout.updateEmail(email);
+  const isValid = updateResult.type !== "error";
+
+  return { isValid, message: !isValid ? updateResult.error.message : null };
+}
+
+const EmailInput = ({ email, setEmail, error, setError }) => {
+  const checkout = useCheckout();
+
+  const handleBlur = async () => {
+    if (!email) {
+      return;
+    }
+
+    const { isValid, message } = await validateEmail(email, checkout);
+    if (!isValid) {
+      setError(message);
+    }
+  };
+
+  const handleChange = (e) => {
+    setError(null);
+    setEmail(e.target.value);
+  };
+
   return (
-    <form className={'w-96 mx-auto mt-4'}>
-      <PaymentElement options={{layout: 'accordion'}}/>
+    <>
+      <label>
+        Email
+        <Input
+          id="email"
+          type="text"
+          value={email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          placeholder="you@example.com"
+        />
+      </label>
+      {error && <div id="email-errors">{error}</div>}
+    </>
+  );
+};
+
+const CheckoutForm = () => {
+  const checkout = useCheckout();
+
+  const [email, setEmail] = useState('manhnd9293@gmail.com');
+  const [emailError, setEmailError] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setIsLoading(true);
+
+    const { isValid, message } = await validateEmail(email, checkout);
+    if (!isValid) {
+      setEmailError(message);
+      setMessage(message);
+      setIsLoading(false);
+      return;
+    }
+
+    const confirmResult = await checkout.confirm({
+      returnUrl: 'http://localhost:5173/checkout-success'
+    });
+
+    // This point will only be reached if there is an immediate error when
+    // confirming the payment. Otherwise, your customer will be redirected to
+    // your `return_url`. For some payment methods like iDEAL, your customer will
+    // be redirected to an intermediate site first to authorize the payment, then
+    // redirected to the `return_url`.
+    if (confirmResult.type === 'error') {
+      setMessage(confirmResult.error.message);
+    }
+
+    setIsLoading(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className={'w-md bg-white p-4 rounded-md shadow mx-auto'}>
+      <EmailInput
+        email={email}
+        setEmail={setEmail}
+        error={emailError}
+        setError={setEmailError}
+      />
+      <h4 className={'mt-4 mb-2'}>Payment</h4>
+      <PaymentElement id="payment-element" />
+      <div className={'flex justify-center'}>
+        <Button className={'mt-4 mx-auto'}
+                disabled={isLoading}
+                id="submit">
+          {isLoading ? (
+            <div className="spinner"></div>
+          ) : (
+            `Pay ${checkout.total.total.amount} now`
+          )}
+        </Button>
+      </div>
+      {/* Show any error or success messages */}
+      {message && <div id="payment-message">{message}</div>}
     </form>
-  )
+  );
 }
 
 export default CheckoutForm;
