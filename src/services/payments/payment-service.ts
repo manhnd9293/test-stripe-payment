@@ -1,7 +1,7 @@
 import {httpClient} from "@/services/http-client/http-client.ts";
 
 export interface CreateCheckoutSessionResponse {
-  clientSecret: string ;
+  clientSecret: string | null;
 }
 
 export class PaymentService {
