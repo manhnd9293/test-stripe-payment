@@ -14,9 +14,7 @@ function ProductCheckoutPage() {
       <BackButton/>
       <CheckoutProvider stripe={stripe}
                         options={{
-                          fetchClientSecret: () => PaymentService
-                            .createCheckoutSession(productId)
-                            .then(response => response.clientSecret),
+                          fetchClientSecret: () => PaymentService.createCheckoutSession(productId!).then(response => response.clientSecret!)
                         }}>
 
         <CheckoutForm />

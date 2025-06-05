@@ -6,7 +6,6 @@ import {
   RouterProvider,
 } from "react-router";
 import Home from "@/pages/home/Home.tsx";
-import CheckOutPage from "@/pages/checkout/CheckOutPage.tsx";
 import ProductVariantPage from "@/pages/product-variants/ProductVariantPage.tsx";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import NewProductPage from "@/pages/products/NewProductPage.tsx";

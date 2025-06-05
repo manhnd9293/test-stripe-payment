@@ -5,12 +5,17 @@ import {Link, useNavigate} from "react-router";
 import {Plus} from "lucide-react";
 
 function Home() {
-  const {data} = useQuery({
+  const {data, isError, error} = useQuery({
     queryKey: ['products'],
-    queryFn: ProductServices.getProducts
+    queryFn: ProductServices.getProducts,
+    retry: false
   });
 
   const navigate = useNavigate();
+
+  if (isError) {
+    return <div>Fail to load product: {error.toString()}</div>
+  }
 
   return (
     <div className={'p-4'}>
